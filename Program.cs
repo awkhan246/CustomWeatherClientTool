@@ -23,28 +23,36 @@ namespace CustomWeatherClientTool
             string json = r.ReadToEnd();
             List<CityDetail> items = JsonSerializer.Deserialize<List<CityDetail>>(json);
 
-            if (cityOption != "Exit")
+            if (cityOption.ToUpper() != "EXIT")
             {
-                CityDetail cityDetails = items.Where(x => x.city.Contains(cityOption)).FirstOrDefault();
-                Console.WriteLine("City selected by you is:" + cityDetails.city);
-                Console.WriteLine("Please wait while we are fetching the weather details:");
+                CityDetail cityDetails = items.Where(x => x.city.ToUpper().Contains(cityOption.ToUpper())).FirstOrDefault();
+
                 if (cityDetails != null)
                 {
+                    Console.WriteLine("City selected by you is:" + cityDetails.city);
+                    Console.WriteLine("Please wait while we are fetching the weather details:\n");
 
                     using (HttpClient client = new())
-                    {                        
+                    {
                         var customWeather =
                         await client.GetFromJsonAsync<CustomWeather>("https://api.open-meteo.com/v1/forecast?latitude=" + cityDetails.lat + "&longitude=" + cityDetails.lng + "&current_weather=true");
-                        
+
                         if (customWeather != null)
                         {
+                            Console.WriteLine("Current Weather of : " + cityDetails.city);
+                            Console.WriteLine("===========================================");
+
                             Console.WriteLine("Temperature: " + customWeather.current_weather.temperature);
                             Console.WriteLine("Wind Speed: " + customWeather.current_weather.windspeed);
                             Console.WriteLine("Wind Direction: " + customWeather.current_weather.winddirection);
                         }
                     }
                 }
-                Console.WriteLine("Do you want to continue? (Y/N): ");
+                else
+                {
+                    Console.WriteLine("\nCould not find any city named \""+ cityOption + "\" in our database.");
+                }
+                Console.WriteLine("\nDo you want to continue? (Y/N): ");
 
                 string isContinue = Console.ReadLine();
 
